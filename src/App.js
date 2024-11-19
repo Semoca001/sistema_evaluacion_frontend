@@ -5,7 +5,7 @@ import Login from "./components/Login"; // Importa el componente Login
 import Register from "./components/Register"; // Importa el componente Register
 
 function App() {
-  const [userRole] = useState("admin"); // Esto debe venir del sistema de autenticación
+  const [userRole] = useState(""); // Esto debe venir del sistema de autenticación
 
   return (
     <Router>

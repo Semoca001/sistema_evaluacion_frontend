@@ -22,59 +22,11 @@ const Register = () => {
     setNombre(filteredValue);
     const error = validateNombre(filteredValue);
     setErrorNombre(error);
-    validateForm();
-  };
 
-  const handleCorreoChange = (e) => {
-    const value = e.target.value;
-    setCorreo(value);
-    const error = validateCorreo(value);
-    setErrorCorreo(error);
-    validateForm();
-  };
-
-  const handleContrasenaChange = (e) => {
-    const value = e.target.value;
-    setContrasena(value);
-    const error = validateContrasena(value);
-    setErrorContrasena(error);
-    validateForm();
-  };
-
-  const togglePasswordVisibility = () => {
-    setIsPasswordVisible(prevState => !prevState);
-  };
-
-  const validateForm = () => {
-    if (!errorNombre && !errorCorreo && !errorContrasena && nombre && correo && contrasena) {
-      setIsSubmitDisabled(false);
-    } else {
-      setIsSubmitDisabled(true);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!isSubmitDisabled) {
-      try {
-        const response = await axios.post("http://localhost:5000/api/v1/users/register", {
-          nombre,
-          correo,
-          contrasena,
-          rol_id: 1,
-        });
-        setMessage("¡Registro exitoso! Bienvenido.");
-        setMessageType("success");
-      } catch (error) {
-        if (error.response) {
-          setMessage(error.response.data.message || "Error al registrar el usuario.");
-        } else {
-          setMessage("Error al conectar con el servidor.");
-        }
-        setMessageType("error");
       }
     }
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -104,6 +56,7 @@ const Register = () => {
               id="correo"
               value={correo}
               onChange={handleCorreoChange}
+
               className="w-full p-3 border border-gray-700 rounded-md shadow-sm bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Ingresa tu correo"
             />
