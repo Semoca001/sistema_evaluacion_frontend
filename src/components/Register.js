@@ -1,123 +1,158 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { validateNombre, validateCorreo, validateContrasena } from "../utils/formValidations";
+import "tailwindcss/tailwind.css";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Register = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [errorNombre, setErrorNombre] = useState("");
+  const [errorCorreo, setErrorCorreo] = useState("");
+  const [errorContrasena, setErrorContrasena] = useState("");
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
 
-  const handleRegister = async (e) => {
+  const handleNombreChange = (e) => {
+    const value = e.target.value;
+    const filteredValue = value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/g, '');
+    setNombre(filteredValue);
+    const error = validateNombre(filteredValue);
+    setErrorNombre(error);
+    validateForm();
+  };
+
+  const handleCorreoChange = (e) => {
+    const value = e.target.value;
+    setCorreo(value);
+    const error = validateCorreo(value);
+    setErrorCorreo(error);
+    validateForm();
+  };
+
+  const handleContrasenaChange = (e) => {
+    const value = e.target.value;
+    setContrasena(value);
+    const error = validateContrasena(value);
+    setErrorContrasena(error);
+    validateForm();
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(prevState => !prevState);
+  };
+
+  const validateForm = () => {
+    if (!errorNombre && !errorCorreo && !errorContrasena && nombre && correo && contrasena) {
+      setIsSubmitDisabled(false);
+    } else {
+      setIsSubmitDisabled(true);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validación simple de los campos
-    if (!name || !email || !password || !confirmPassword) {
-      setError("Por favor, ingresa todos los campos.");
-      return;
+    if (!isSubmitDisabled) {
+      try {
+        const response = await axios.post("http://localhost:5000/api/v1/users/register", {
+          nombre,
+          correo,
+          contrasena,
+          rol_id: 1,
+        });
+        setMessage("¡Registro exitoso! Bienvenido.");
+        setMessageType("success");
+      } catch (error) {
+        if (error.response) {
+          setMessage(error.response.data.message || "Error al registrar el usuario.");
+        } else {
+          setMessage("Error al conectar con el servidor.");
+        }
+        setMessageType("error");
+      }
     }
-
-    if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
-
-    // Aquí puedes hacer la solicitud a tu backend para registrar al usuario
-    console.log("Registrando usuario", name, email, password);
-    
-    // Simulación de éxito (en la vida real, es donde manejarías la respuesta del backend)
-    setSuccess("¡Registro exitoso! Ahora puedes iniciar sesión.");
-    setError("");
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Crear Cuenta</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gray-900">
+      <div className="max-w-sm w-full bg-gray-800 p-6 rounded-md shadow-lg">
+        <h2 className="text-2xl font-semibold text-center text-gray-200 mb-6">Registro de Usuario</h2>
+        
 
-        {/* Formulario de registro */}
-        <form onSubmit={handleRegister}>
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-600">
-              Nombre
-            </label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-300" htmlFor="nombre">Nombre</label>
             <input
               type="text"
-              id="name"
-              className="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Tu nombre completo"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              id="nombre"
+              value={nombre}
+              onChange={handleNombreChange}
+              maxLength="50"
+              className="w-full p-3 border border-gray-700 rounded-md shadow-sm bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ingresa tu nombre"
             />
+            {errorNombre && <p className="text-red-400 text-sm mt-1">{errorNombre}</p>}
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-600">
-              Correo electrónico
-            </label>
+          <div>
+            <label className="block text-gray-300" htmlFor="correo">Correo</label>
             <input
               type="email"
-              id="email"
-              className="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Tu correo electrónico"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="correo"
+              value={correo}
+              onChange={handleCorreoChange}
+              className="w-full p-3 border border-gray-700 rounded-md shadow-sm bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ingresa tu correo"
             />
+            {errorCorreo && <p className="text-red-400 text-sm mt-1">{errorCorreo}</p>}
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-600">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              id="password"
-              className="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Tu contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+          <div>
+            <label className="block text-gray-300" htmlFor="contrasena">Contraseña</label>
+            <div className="relative">
+              <input
+                type={isPasswordVisible ? "text" : "password"}
+                id="contrasena"
+                value={contrasena}
+                onChange={handleContrasenaChange}
+                minLength="10"
+                maxLength="20"
+                className="w-full p-3 border border-gray-700 rounded-md shadow-sm bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ingresa tu contraseña"
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-200 focus:outline-none"
+              >
+                {isPasswordVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              </button>
+            </div>
+            {errorContrasena && <p className="text-red-400 text-sm mt-1">{errorContrasena}</p>}
           </div>
 
-          <div className="mb-6">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-600">
-              Confirmar Contraseña
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              className="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Confirma tu contraseña"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
+          {message && (
+          <div className={`mb-4 p-3 rounded-md ${messageType === "success" ? 'bg-green-600' : 'bg-red-600'}`}>
+            <p className="text-white text-center">{message}</p>
           </div>
+        )}
 
-          {/* Mostrar errores */}
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-          {/* Mostrar mensaje de éxito */}
-          {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 focus:outline-none"
-          >
-            Registrarse
-          </button>
+          <div>
+            <button
+              type="submit"
+              disabled={isSubmitDisabled}
+              className={`w-full p-3 mt-4 text-white rounded-md ${isSubmitDisabled ? 'bg-gray-600' : 'bg-blue-600 hover:bg-blue-700'}`}
+            >
+              Registrarse
+            </button>
+          </div>
         </form>
-
-        <div className="mt-4 text-center">
-          <p className="text-sm text-gray-600">
-            ¿Ya tienes cuenta?{" "}
-            <a href="/login" className="text-blue-600 hover:text-blue-700">
-              Inicia sesión aquí
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   );
 };
 
 export default Register;
-
