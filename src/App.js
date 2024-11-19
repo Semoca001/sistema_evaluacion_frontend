@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Home from "./components/Home"; // Asegúrate de que la ruta sea correcta
-import Login from "./components/Login"; // Importa el componente Login
-import Register from "./components/Register"; // Importa el componente Register
+import Home from "./components/Home";
+import Login from "./components/Login";
+import Register from "./components/Register";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -14,14 +14,17 @@ function App() {
       const parsedUser = JSON.parse(userData);
       setUserRole(parsedUser.rol_id); // Asigna el rol del usuario
     }
-  }, []); // Se ejecuta una sola vez al montar el componente
+  }, []);
 
   return (
     <Router>
       <Routes>
-        <Route path="/home" element={<Home userRole={userRole} />} />
+        {/* Ruta pública */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Ruta para la página de inicio, ya no está protegida */}
+        <Route path="/home" element={<Home userRole={userRole} />} />
       </Routes>
     </Router>
   );

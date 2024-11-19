@@ -3,6 +3,7 @@ import axios from "axios";
 import { validateNombre, validateCorreo, validateContrasena } from "../utils/formValidations";
 import "tailwindcss/tailwind.css";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { Link } from "react-router-dom"; // Importa Link para la navegación
 
 const Register = () => {
   const [nombre, setNombre] = useState("");
@@ -56,23 +57,23 @@ const Register = () => {
     e.preventDefault();
     if (!isSubmitDisabled) {
       try {
-        const response = await axios.post("http://localhost:5000/api/v1/users/register", {
+        await axios.post("http://localhost:5000/api/v1/users/register", {
           nombre,
           correo,
           contrasena,
           rol_id: 1,
         });
-
+  
         setMessage("¡Registro exitoso! Bienvenido.");
         setMessageType("success");
-
+  
         setNombre("");
         setCorreo("");
         setContrasena("");
         setErrorNombre("");
         setErrorCorreo("");
         setErrorContrasena("");
-
+  
         setTimeout(() => {
           setMessage("");
           setMessageType("");
@@ -84,7 +85,7 @@ const Register = () => {
           setMessage("Error al conectar con el servidor.");
         }
         setMessageType("error");
-
+  
         setTimeout(() => {
           setMessage("");
           setMessageType("");
@@ -92,7 +93,7 @@ const Register = () => {
       }
     }
   };
-
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -154,10 +155,10 @@ const Register = () => {
           </div>
 
           {message && (
-          <div className={`mb-4 p-3 rounded-md ${messageType === "success" ? 'bg-green-600' : 'bg-red-600'}`}>
-            <p className="text-white text-center">{message}</p>
-          </div>
-        )}
+            <div className={`mb-4 p-3 rounded-md ${messageType === "success" ? 'bg-green-600' : 'bg-red-600'}`}>
+              <p className="text-white text-center">{message}</p>
+            </div>
+          )}
 
           <div>
             <button
@@ -169,6 +170,14 @@ const Register = () => {
             </button>
           </div>
         </form>
+
+        {/* Agrega el mensaje con el enlace para ir al login */}
+        <div className="mt-4 text-center text-gray-300">
+          <p className="text-sm">
+            ¿Ya tienes una cuenta? 
+            <Link to="/login" className="text-blue-500 hover:text-blue-700">Inicia sesión</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
