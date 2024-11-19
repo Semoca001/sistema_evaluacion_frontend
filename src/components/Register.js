@@ -63,8 +63,23 @@ const Register = () => {
           contrasena,
           rol_id: 1,
         });
+  
         setMessage("¡Registro exitoso! Bienvenido.");
         setMessageType("success");
+  
+        // Limpia los campos y errores
+        setNombre("");
+        setCorreo("");
+        setContrasena("");
+        setErrorNombre("");
+        setErrorCorreo("");
+        setErrorContrasena("");
+  
+        // Limpia el mensaje después de 3 segundos
+        setTimeout(() => {
+          setMessage("");
+          setMessageType("");
+        }, 3000);
       } catch (error) {
         if (error.response) {
           setMessage(error.response.data.message || "Error al registrar el usuario.");
@@ -72,6 +87,12 @@ const Register = () => {
           setMessage("Error al conectar con el servidor.");
         }
         setMessageType("error");
+  
+        // Limpia el mensaje después de 3 segundos
+        setTimeout(() => {
+          setMessage("");
+          setMessageType("");
+        }, 3000);
       }
     }
   };
