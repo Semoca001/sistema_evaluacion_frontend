@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { validateCorreo } from "../utils/formValidations";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importar los íconos de react-icons
 import "tailwindcss/tailwind.css";
 
 const Login = () => {
@@ -10,10 +12,13 @@ const Login = () => {
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
-  const [userDetails, setUserDetails] = useState(null); // Estado para almacenar detalles del usuario
+  const [userDetails, setUserDetails] = useState(null);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false); // Estado para visibilidad de la contraseña
+
+  const navigate = useNavigate();
 
   const handleCorreoChange = (e) => {
-    const value = e.target.value.slice(0, 50); // Limitar a 50 caracteres
+    const value = e.target.value.slice(0, 50);
     setEmail(value);
     const error = validateCorreo(value);
     setErrorCorreo(error);
@@ -21,7 +26,7 @@ const Login = () => {
   };
 
   const handleContrasenaChange = (e) => {
-    const value = e.target.value.slice(0, 20); // Limitar a 20 caracteres
+    const value = e.target.value.slice(0, 20);
     setPassword(value);
     validateForm(email, value, errorCorreo);
   };
@@ -30,6 +35,10 @@ const Login = () => {
     const isCorreoValid = emailValue && !errorCorreoValue;
     const isContrasenaValid = passwordValue.length > 0;
     setIsSubmitDisabled(!(isCorreoValid && isContrasenaValid));
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible((prevState) => !prevState); // Alternar visibilidad
   };
 
   const handleSubmit = async (e) => {
@@ -41,28 +50,19 @@ const Login = () => {
           contrasena: password,
         });
 
-        console.log("Respuesta del servidor:", response.data);
-
         if (response.data.success || response.data.token) {
-          setMessage("Inicio de sesión exitoso. Redirigiendo...");
+          setMessage("Inicio de sesión exitoso.");
           setMessageType("success");
 
-          // Almacenar detalles del usuario y el token en localStorage
           const { token, user } = response.data;
           localStorage.setItem("token", token);
           localStorage.setItem("user", JSON.stringify(user));
 
-          // Actualizar estado con detalles del usuario
           setUserDetails(user);
-
-          // Redirigir al dashboard
-          setTimeout(() => {
-            window.location.href = "/home";
-          }, 2000);
+          navigate("/home");
         }
       } catch (error) {
         if (error.response) {
-          console.log("Error del servidor:", error.response.data);
           setMessage(error.response.data.message || "Correo o contraseña incorrectos.");
         } else {
           setMessage("Error al conectar con el servidor.");
@@ -98,15 +98,24 @@ const Login = () => {
             <label htmlFor="password" className="block text-gray-300">
               Contraseña
             </label>
-            <input
-              type="password"
-              id="password"
-              maxLength="20"
-              className="mt-2 p-3 w-full border border-gray-700 rounded-md bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Tu contraseña"
-              value={password}
-              onChange={handleContrasenaChange}
-            />
+            <div className="relative">
+              <input
+                type={isPasswordVisible ? "text" : "password"} // Alternar entre texto y contraseña
+                id="password"
+                maxLength="20"
+                className="mt-2 p-3 w-full border border-gray-700 rounded-md bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Tu contraseña"
+                value={password}
+                onChange={handleContrasenaChange}
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-200"
+              >
+                {isPasswordVisible ? <FaEyeSlash /> : <FaEye />} {/* Íconos para mostrar/ocultar */}
+              </button>
+            </div>
           </div>
 
           {message && (
@@ -118,7 +127,7 @@ const Login = () => {
           {userDetails && (
             <div className="mt-4 p-3 rounded-md bg-gray-700">
               <p className="text-gray-200 text-sm">
-                Bienvenido, <strong>{userDetails.nombre}</strong> (Rol: {userDetails.rol.nombre})
+                Bienvenido, <strong>{userDetails.nombre}</strong> (Rol: {userDetails.rol && userDetails.rol.nombre})
               </p>
             </div>
           )}
