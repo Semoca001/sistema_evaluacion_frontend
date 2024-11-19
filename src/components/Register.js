@@ -22,7 +22,7 @@ const Register = () => {
     setNombre(filteredValue);
     const error = validateNombre(filteredValue);
     setErrorNombre(error);
-    validateForm();
+    validateForm(filteredValue, correo, contrasena, error, errorCorreo, errorContrasena);
   };
 
   const handleCorreoChange = (e) => {
@@ -30,7 +30,7 @@ const Register = () => {
     setCorreo(value);
     const error = validateCorreo(value);
     setErrorCorreo(error);
-    validateForm();
+    validateForm(nombre, value, contrasena, errorNombre, error, errorContrasena);
   };
 
   const handleContrasenaChange = (e) => {
@@ -38,19 +38,18 @@ const Register = () => {
     setContrasena(value);
     const error = validateContrasena(value);
     setErrorContrasena(error);
-    validateForm();
+    validateForm(nombre, correo, value, errorNombre, errorCorreo, error);
+  };
+
+  const validateForm = (nombreValue, correoValue, contrasenaValue, errorNombreValue, errorCorreoValue, errorContrasenaValue) => {
+    const isNombreValid = nombreValue && !errorNombreValue;
+    const isCorreoValid = correoValue && !errorCorreoValue;
+    const isContrasenaValid = contrasenaValue && !errorContrasenaValue;
+    setIsSubmitDisabled(!(isNombreValid && isCorreoValid && isContrasenaValid));
   };
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(prevState => !prevState);
-  };
-
-  const validateForm = () => {
-    if (!errorNombre && !errorCorreo && !errorContrasena && nombre && correo && contrasena) {
-      setIsSubmitDisabled(false);
-    } else {
-      setIsSubmitDisabled(true);
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -63,19 +62,17 @@ const Register = () => {
           contrasena,
           rol_id: 1,
         });
-  
+
         setMessage("¡Registro exitoso! Bienvenido.");
         setMessageType("success");
-  
-        // Limpia los campos y errores
+
         setNombre("");
         setCorreo("");
         setContrasena("");
         setErrorNombre("");
         setErrorCorreo("");
         setErrorContrasena("");
-  
-        // Limpia el mensaje después de 3 segundos
+
         setTimeout(() => {
           setMessage("");
           setMessageType("");
@@ -87,8 +84,7 @@ const Register = () => {
           setMessage("Error al conectar con el servidor.");
         }
         setMessageType("error");
-  
-        // Limpia el mensaje después de 3 segundos
+
         setTimeout(() => {
           setMessage("");
           setMessageType("");
@@ -96,6 +92,7 @@ const Register = () => {
       }
     }
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -125,6 +122,7 @@ const Register = () => {
               id="correo"
               value={correo}
               onChange={handleCorreoChange}
+              maxLength="100"
               className="w-full p-3 border border-gray-700 rounded-md shadow-sm bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Ingresa tu correo"
             />
