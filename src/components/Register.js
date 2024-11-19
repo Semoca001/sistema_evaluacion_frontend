@@ -22,73 +22,7 @@ const Register = () => {
     setNombre(filteredValue);
     const error = validateNombre(filteredValue);
     setErrorNombre(error);
-    validateForm(filteredValue, correo, contrasena, error, errorCorreo, errorContrasena);
-  };
 
-  const handleCorreoChange = (e) => {
-    const value = e.target.value;
-    setCorreo(value);
-    const error = validateCorreo(value);
-    setErrorCorreo(error);
-    validateForm(nombre, value, contrasena, errorNombre, error, errorContrasena);
-  };
-
-  const handleContrasenaChange = (e) => {
-    const value = e.target.value;
-    setContrasena(value);
-    const error = validateContrasena(value);
-    setErrorContrasena(error);
-    validateForm(nombre, correo, value, errorNombre, errorCorreo, error);
-  };
-
-  const validateForm = (nombreValue, correoValue, contrasenaValue, errorNombreValue, errorCorreoValue, errorContrasenaValue) => {
-    const isNombreValid = nombreValue && !errorNombreValue;
-    const isCorreoValid = correoValue && !errorCorreoValue;
-    const isContrasenaValid = contrasenaValue && !errorContrasenaValue;
-    setIsSubmitDisabled(!(isNombreValid && isCorreoValid && isContrasenaValid));
-  };
-
-  const togglePasswordVisibility = () => {
-    setIsPasswordVisible(prevState => !prevState);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!isSubmitDisabled) {
-      try {
-        const response = await axios.post("http://localhost:5000/api/v1/users/register", {
-          nombre,
-          correo,
-          contrasena,
-          rol_id: 1,
-        });
-
-        setMessage("¡Registro exitoso! Bienvenido.");
-        setMessageType("success");
-
-        setNombre("");
-        setCorreo("");
-        setContrasena("");
-        setErrorNombre("");
-        setErrorCorreo("");
-        setErrorContrasena("");
-
-        setTimeout(() => {
-          setMessage("");
-          setMessageType("");
-        }, 3000);
-      } catch (error) {
-        if (error.response) {
-          setMessage(error.response.data.message || "Error al registrar el usuario.");
-        } else {
-          setMessage("Error al conectar con el servidor.");
-        }
-        setMessageType("error");
-
-        setTimeout(() => {
-          setMessage("");
-          setMessageType("");
-        }, 3000);
       }
     }
   };
@@ -122,7 +56,7 @@ const Register = () => {
               id="correo"
               value={correo}
               onChange={handleCorreoChange}
-              maxLength="100"
+
               className="w-full p-3 border border-gray-700 rounded-md shadow-sm bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Ingresa tu correo"
             />
