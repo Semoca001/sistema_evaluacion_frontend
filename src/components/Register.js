@@ -3,7 +3,7 @@ import axios from "axios";
 import { validateNombre, validateCorreo, validateContrasena } from "../utils/formValidations";
 import "tailwindcss/tailwind.css";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Link } from "react-router-dom"; // Importa Link para la navegación
+import { Link, useNavigate } from "react-router-dom"; // Importa Link y useNavigate
 
 const Register = () => {
   const [nombre, setNombre] = useState("");
@@ -16,6 +16,8 @@ const Register = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
+
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   const handleNombreChange = (e) => {
     const value = e.target.value;
@@ -63,21 +65,22 @@ const Register = () => {
           contrasena,
           rol_id: 1,
         });
-  
-        setMessage("¡Registro exitoso! Bienvenido.");
+
+        setMessage("¡Registro exitoso! Redirigiendo al inicio de sesión...");
         setMessageType("success");
-  
+
+        // Limpia los campos
         setNombre("");
         setCorreo("");
         setContrasena("");
         setErrorNombre("");
         setErrorCorreo("");
         setErrorContrasena("");
-  
+
+        // Redirige al login después de 2 segundos
         setTimeout(() => {
-          setMessage("");
-          setMessageType("");
-        }, 3000);
+          navigate("/login"); // Redirige al login
+        }, 2000);
       } catch (error) {
         if (error.response) {
           setMessage(error.response.data.message || "Error al registrar el usuario.");
@@ -85,21 +88,14 @@ const Register = () => {
           setMessage("Error al conectar con el servidor.");
         }
         setMessageType("error");
-  
-        setTimeout(() => {
-          setMessage("");
-          setMessageType("");
-        }, 3000);
       }
     }
   };
-  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <div className="max-w-sm w-full bg-gray-800 p-6 rounded-md shadow-lg">
         <h2 className="text-2xl font-semibold text-center text-gray-200 mb-6">Registro de Usuario</h2>
-        
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -171,7 +167,6 @@ const Register = () => {
           </div>
         </form>
 
-        {/* Agrega el mensaje con el enlace para ir al login */}
         <div className="mt-4 text-center text-gray-300">
           <p className="text-sm">
             ¿Ya tienes una cuenta? 
