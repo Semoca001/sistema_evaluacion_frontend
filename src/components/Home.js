@@ -43,7 +43,7 @@ const Home = ({ userRole }) => {
         </div>
 
         {/* Menú Admin (solo si el rol es admin) */}
-        {userRole === "admin" && (
+        {userRole === "1" && (
           <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
             <h2 className="text-xl font-semibold text-gray-700">Menú Admin</h2>
             <div className="mt-4 space-y-3">
