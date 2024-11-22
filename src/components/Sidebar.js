@@ -22,10 +22,10 @@ const Sidebar = ({ userRole }) => {
               Menú Admin
             </h2>
             <Link
-              to="/home/create-company"
+              to="/home/manage-company"
               className="py-2 px-4 rounded bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-md"
             >
-              Crear Empresa
+              Gestio de empresa
             </Link>
             <Link
               to="/home/manage-users"
