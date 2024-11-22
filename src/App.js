@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Sidebar from "./components/Sidebar";
 import ManageCompany from "./components/ManageCompany"; // Importa el nuevo componente
+import ManageUsers from "./components/ManageUsers"; // Importa el nuevo componente para gestión de usuarios
 
 const HomeLayout = ({ userRole }) => (
   <div className="flex min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-gray-200">
@@ -18,7 +19,8 @@ const HomeLayout = ({ userRole }) => (
         <Route path="/quality-evaluation" element={<div>Evaluación de Calidad</div>} />
         <Route path="/risk-survey" element={<div>Encuesta de Riesgo</div>} />
         <Route path="/results-history" element={<div>Historial de Resultados</div>} />
-        <Route path="/manage-company" element={<ManageCompany />} /> {/* Nueva ruta */}
+        <Route path="/manage-company" element={<ManageCompany />} /> {/* Ruta para gestionar la empresa */}
+        <Route path="/manage-users" element={<ManageUsers />} /> {/* Nueva ruta para gestionar usuarios */}
       </Routes>
     </div>
   </div>
