@@ -4,8 +4,9 @@ import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Sidebar from "./components/Sidebar";
-import ManageCompany from "./components/ManageCompany"; // Importa el nuevo componente
-import ManageUsers from "./components/ManageUsers"; // Importa el nuevo componente para gestión de usuarios
+import ManageCompany from "./components/ManageCompany"; // Componente para gestionar empresas
+import ManageUsers from "./components/ManageUsers"; // Componente para gestionar usuarios
+import ManageSoftware from "./components/ManageSoftware"; // Nuevo componente para gestionar software
 
 const HomeLayout = ({ userRole }) => (
   <div className="flex min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-gray-200">
@@ -19,8 +20,9 @@ const HomeLayout = ({ userRole }) => (
         <Route path="/quality-evaluation" element={<div>Evaluación de Calidad</div>} />
         <Route path="/risk-survey" element={<div>Encuesta de Riesgo</div>} />
         <Route path="/results-history" element={<div>Historial de Resultados</div>} />
-        <Route path="/manage-company" element={<ManageCompany />} /> {/* Ruta para gestionar la empresa */}
-        <Route path="/manage-users" element={<ManageUsers />} /> {/* Nueva ruta para gestionar usuarios */}
+        <Route path="/manage-company" element={<ManageCompany />} />
+        <Route path="/manage-users" element={<ManageUsers />} />
+        <Route path="/manage-software" element={<ManageSoftware />} /> {/* Nueva ruta para gestionar software */}
       </Routes>
     </div>
   </div>
