@@ -7,6 +7,8 @@ import Sidebar from "./components/Sidebar";
 import ManageCompany from "./components/ManageCompany"; // Componente para gestionar empresas
 import ManageUsers from "./components/ManageUsers"; // Componente para gestionar usuarios
 import ManageSoftware from "./components/ManageSoftware"; // Nuevo componente para gestionar software
+import EncuestaCalidad from "./components/EncuestaCalidad"; // Componente para evaluación de calidad
+import EncuestaRiesgo from "./components/EncuestaRiesgo";
 
 const HomeLayout = ({ userRole }) => (
   <div className="flex min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-gray-200">
@@ -17,8 +19,8 @@ const HomeLayout = ({ userRole }) => (
     <div className="flex-1 p-6">
       <Routes>
         <Route path="/" element={<Home userRole={userRole} />} />
-        <Route path="/quality-evaluation" element={<div>Evaluación de Calidad</div>} />
-        <Route path="/risk-survey" element={<div>Encuesta de Riesgo</div>} />
+        <Route path="/quality-evaluation" element={<EncuestaCalidad />} /> {/* Ruta para EncuestaCalidad */}
+        <Route path="/risk-evaluation" element={<EncuestaRiesgo />} /> {/* Ruta riesgo */}   
         <Route path="/results-history" element={<div>Historial de Resultados</div>} />
         <Route path="/manage-company" element={<ManageCompany />} />
         <Route path="/manage-users" element={<ManageUsers />} />
