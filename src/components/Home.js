@@ -14,7 +14,16 @@ const Home = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const empresaId = user?.empresa_id;
   const creadorId = user?.id;
+  const rolId = user?.rol_id; // Recuperar el rol del usuario
   const token = localStorage.getItem("token"); // Obtener el token de acceso
+
+  // Validar si el usuario no tiene empresa asignada y es administrador
+  useEffect(() => {
+    if (rolId === 1 && empresaId === null) {
+      setError("Debes gestionar una empresa antes de continuar.");
+      return;
+    }
+  }, [rolId, empresaId]);
 
   // Función para obtener los softwares del backend
   const fetchSoftwares = async () => {
@@ -30,11 +39,10 @@ const Home = () => {
         `http://localhost:5000/api/v1/software/empresa/${empresaId}/creador/${creadorId}`,
         {
           headers: {
-            Authorization: `Bearer ${token}` // Agregar el token al encabezado
-          }
+            Authorization: `Bearer ${token}`, // Agregar el token al encabezado
+          },
         }
       );
-      console.log(response.data); // Verificamos que estamos recibiendo los datos correctos
 
       if (response.data && response.data.length > 0) {
         setSoftwares(response.data);
@@ -82,11 +90,31 @@ const Home = () => {
     }
   };
 
+  // Mostrar mensaje si el usuario es admin y no tiene empresa asignada
+  if (rolId === 1 && empresaId === null) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-900">
+        <div className="bg-gray-800 text-white p-6 rounded-lg shadow-lg text-center">
+          <h1 className="text-2xl font-bold mb-4">¡Acceso restringido!</h1>
+          <p className="text-lg mb-4">
+            Eres administrador, pero no tienes ninguna empresa asignada. Por favor, gestiona una empresa antes de continuar.
+          </p>
+          <button
+            onClick={() => navigate("/home/manage-company")} // Redirigir a la ruta de gestión de empresa
+            className="py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-500 transition-all duration-300"
+          >
+            Ir a Gestionar Empresa
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-900 bg-opacity-90">
       <div className="flex-1 flex justify-center items-center">
         <div className="w-full max-w-4xl bg-gray-800 bg-opacity-90 text-white rounded-lg p-8 shadow-lg">
-          <h1 className="text-3xl font-bold mb-6 text-center">Evaluacion de softwares</h1>
+          <h1 className="text-3xl font-bold mb-6 text-center">Evaluación de softwares</h1>
           
           {/* Mostrar errores si ocurre */}
           {error && <p className="text-red-600 text-center">{error}</p>}
@@ -97,7 +125,7 @@ const Home = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {softwares.length === 0 ? (
-                <p className="text-lg text-gray-300">No hay softwares disponibles.</p>
+                <p className="text-lg text-gray-300"></p>
               ) : (
                 softwares.map((software) => (
                   <div

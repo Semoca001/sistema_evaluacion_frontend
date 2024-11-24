@@ -12,8 +12,15 @@ const EncuestaRiesgo = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const software = JSON.parse(localStorage.getItem("software"));
 
+    if (!software || !software.id) {
+      // Si no hay software o no tiene ID, redirige al usuario a /home
+      navigate("/home");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
     if (!token) {
       setError("No se encontró el token. Inicia sesión nuevamente.");
       setLoading(false);
@@ -42,7 +49,7 @@ const EncuestaRiesgo = () => {
         console.error(err);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [navigate]);
 
   const handleInputChange = (preguntaId, value) => {
     setRespuestas((prev) => {
@@ -194,3 +201,4 @@ const EncuestaRiesgo = () => {
 };
 
 export default EncuestaRiesgo;
+
