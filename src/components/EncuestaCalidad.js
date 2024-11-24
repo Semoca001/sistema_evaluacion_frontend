@@ -219,7 +219,7 @@ const EncuestaCalidad = () => {
                             value={val}
                             checked={respuestas[pregunta.id] === val}
                             onChange={() => handleInputChange(pregunta.id, val)}
-                            className="mr-2 text-blue-500"
+                            className="mr-2 transform scale-150 text-blue-500"
                           />
                           <label
                             htmlFor={`pregunta-${pregunta.id}-value-${val}`}
