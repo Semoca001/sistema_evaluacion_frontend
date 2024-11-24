@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { validateNombre, validateCorreo, validateContrasena } from "../utils/formValidations";
 import "tailwindcss/tailwind.css";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Link, useNavigate } from "react-router-dom"; // Importa Link y useNavigate
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [nombre, setNombre] = useState("");
@@ -17,7 +17,12 @@ const Register = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
 
-  const navigate = useNavigate(); // Inicializa useNavigate
+  const navigate = useNavigate();
+
+  // Limpia el localStorage al cargar el componente
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
 
   const handleNombreChange = (e) => {
     const value = e.target.value;
@@ -79,7 +84,7 @@ const Register = () => {
 
         // Redirige al login después de 2 segundos
         setTimeout(() => {
-          navigate("/login"); // Redirige al login
+          navigate("/login");
         }, 2000);
       } catch (error) {
         if (error.response) {
@@ -179,3 +184,4 @@ const Register = () => {
 };
 
 export default Register;
+
