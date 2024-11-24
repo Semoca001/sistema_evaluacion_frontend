@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { validateCorreo } from "../utils/formValidations";
@@ -16,6 +16,11 @@ const Login = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false); // Estado para visibilidad de la contraseña
 
   const navigate = useNavigate();
+
+  // Limpiar el almacenamiento local al cargar la pantalla de Login
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
 
   const handleCorreoChange = (e) => {
     const value = e.target.value.slice(0, 50);
@@ -157,3 +162,4 @@ const Login = () => {
 };
 
 export default Login;
+

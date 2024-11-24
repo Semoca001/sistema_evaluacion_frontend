@@ -9,7 +9,6 @@ const EncuestaCalidad = () => {
   const [respuestas, setRespuestas] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // eslint-disable-next-line
   const [encuestaId, setEncuestaId] = useState(null); // Para almacenar el ID de la encuesta
   const [isFormValid, setIsFormValid] = useState(false); // Para controlar si el formulario está listo para enviar
   const [popupVisible, setPopupVisible] = useState(false); // Para controlar la visibilidad del popup
@@ -17,11 +16,16 @@ const EncuestaCalidad = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const software = JSON.parse(localStorage.getItem("software"));
+    if (!software || !software.id) {
+      // Si no hay software o no tiene ID válido, redirige al usuario a /home
+      navigate("/home");
+      return;
+    }
 
+    const token = localStorage.getItem("token");
     if (!token) {
       setError("No se encontró el token. Inicia sesión nuevamente.");
-      setLoading(false);
       return;
     }
 
@@ -36,7 +40,7 @@ const EncuestaCalidad = () => {
         setError("Error al cargar los modelos de calidad.");
         console.error(err);
       });
-  }, []);
+  }, [navigate]);
 
   const handleSelectChange = async (event) => {
     const id = event.target.value;
@@ -219,7 +223,7 @@ const EncuestaCalidad = () => {
                             value={val}
                             checked={respuestas[pregunta.id] === val}
                             onChange={() => handleInputChange(pregunta.id, val)}
-                            className="mr-2 text-blue-500"
+                            className="mr-2 transform scale-150 text-blue-500"
                           />
                           <label
                             htmlFor={`pregunta-${pregunta.id}-value-${val}`}

@@ -7,13 +7,21 @@ const EncuestaRiesgo = () => {
   const [respuestas, setRespuestas] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isFormValid, setIsFormValid] = useState(false); // Para controlar si el formulario está listo para enviar
-  const [isSubmitted, setIsSubmitted] = useState(false); // Para controlar si la encuesta fue enviada con éxito
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [resultados, setResultados] = useState(null); // Nuevo estado para los resultados
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const software = JSON.parse(localStorage.getItem("software"));
 
+    if (!software || !software.id) {
+      // Si no hay software o no tiene ID, redirige al usuario a /home
+      navigate("/home");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
     if (!token) {
       setError("No se encontró el token. Inicia sesión nuevamente.");
       setLoading(false);
@@ -28,7 +36,6 @@ const EncuestaRiesgo = () => {
       })
       .then((response) => {
         setCuestionario(response.data);
-        // Inicializar respuestas vacías para cada pregunta
         const initialResponses = {};
         response.data.forEach((categoria) =>
           categoria.preguntas.forEach((pregunta) => {
@@ -42,7 +49,30 @@ const EncuestaRiesgo = () => {
         console.error(err);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [navigate]);
+
+  useEffect(() => {
+    // Si la encuesta fue enviada, obtener los resultados
+    if (isSubmitted) {
+      const token = localStorage.getItem("token");
+      const encuestaId = localStorage.getItem("encuestaId"); // Asumiendo que el ID de la encuesta se guarda aquí
+
+      axios
+        .get(
+          `http://localhost:5000/api/v1/encuestas/${encuestaId}/resultados`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+        .then((response) => {
+          setResultados(response.data.categorias); // Guardar las categorías y sus preguntas
+        })
+        .catch((err) => {
+          setError("Error al cargar los resultados.");
+          console.error(err);
+        });
+    }
+  }, [isSubmitted]);
 
   const handleInputChange = (preguntaId, value) => {
     setRespuestas((prev) => {
@@ -53,8 +83,9 @@ const EncuestaRiesgo = () => {
   };
 
   const validateForm = (responses) => {
-    // Verifica si todas las preguntas tienen una respuesta
-    const allAnswered = Object.values(responses).every((valor) => valor !== null);
+    const allAnswered = Object.values(responses).every(
+      (valor) => valor !== null
+    );
     setIsFormValid(allAnswered);
   };
 
@@ -64,7 +95,6 @@ const EncuestaRiesgo = () => {
     const usuarioId = JSON.parse(localStorage.getItem("user")).id;
 
     try {
-      // Crear la encuesta
       const encuestaResponse = await axios.post(
         "http://localhost:5000/api/v1/encuestas/riesgos",
         {
@@ -74,10 +104,9 @@ const EncuestaRiesgo = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Obtener el ID de la encuesta creada
       const encuestaId = encuestaResponse.data.encuesta.id;
+      localStorage.setItem("encuestaId", encuestaId); // Guardar el ID de la encuesta en el localStorage
 
-      // Enviar las respuestas
       const respuestasData = Object.keys(respuestas).map((preguntaId) => ({
         preguntaId,
         valor: respuestas[preguntaId],
@@ -86,17 +115,13 @@ const EncuestaRiesgo = () => {
       await axios.post(
         `http://localhost:5000/api/v1/encuestas/${encuestaId}/riesgos/responder`,
         {
-          usuarioId, // Incluye usuarioId dentro del cuerpo
+          usuarioId,
           respuestas: respuestasData,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Eliminar la key software del localStorage solo si la respuesta fue exitosa
-      localStorage.removeItem("software");
-
-      // Establecer que la encuesta fue enviada
-      setIsSubmitted(true);
+      setIsSubmitted(true); // Establecer que la encuesta fue enviada
     } catch (error) {
       console.error("Error al enviar la encuesta:", error);
       alert("Hubo un problema al enviar la encuesta.");
@@ -104,7 +129,9 @@ const EncuestaRiesgo = () => {
   };
 
   const handleGoHome = () => {
-    navigate("/home"); // Redirigir al menú principal
+    localStorage.removeItem("encuestaId"); // Borrar el encuestaId del localStorage
+    localStorage.removeItem("software");
+    navigate("/home");
   };
 
   if (error) {
@@ -113,18 +140,22 @@ const EncuestaRiesgo = () => {
 
   return (
     <div className="p-6 bg-gray-900 bg-opacity-75 rounded-lg shadow-lg max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-gray-100">Encuesta de Riesgos</h2>
+      <h2 className="text-2xl font-bold mb-4 text-gray-100">
+        Encuesta de Riesgos
+      </h2>
 
       {/* Mostrar preguntas */}
       {loading && <p className="text-gray-400">Cargando cuestionario...</p>}
-      {cuestionario && (
+      {cuestionario && !isSubmitted && (
         <div className="mt-6">
           {cuestionario.map((categoria) => (
             <div
               key={categoria.id}
               className="mt-4 bg-gray-800 bg-opacity-90 p-4 rounded-lg shadow-lg"
             >
-              <h4 className="text-lg font-bold text-gray-200">{categoria.nombre}</h4>
+              <h4 className="text-lg font-bold text-gray-200">
+                {categoria.nombre}
+              </h4>
               <div className="mt-4 space-y-4">
                 {categoria.preguntas.map((pregunta) => (
                   <div
@@ -147,7 +178,8 @@ const EncuestaRiesgo = () => {
                             value={val}
                             checked={respuestas[pregunta.id] === val}
                             onChange={() => handleInputChange(pregunta.id, val)}
-                            className="mr-2 text-blue-500"
+                            className="mr-2 transform scale-150 text-blue-500"
+                            disabled={isSubmitted}
                           />
                           <label
                             htmlFor={`pregunta-${pregunta.id}-value-${val}`}
@@ -161,6 +193,54 @@ const EncuestaRiesgo = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Mostrar resultados si la encuesta fue enviada */}
+      {isSubmitted && resultados && (
+        <div className="mt-6">
+          <h3 className="text-xl font-bold text-gray-100">
+            Resultados de la Encuesta
+          </h3>
+          {Object.keys(resultados).map((categoriaName) => (
+            <div
+              key={categoriaName}
+              className="mt-4 bg-gray-800 bg-opacity-90 p-4 rounded-lg shadow-lg"
+            >
+              <h4 className="text-lg font-bold text-gray-200">
+                {categoriaName}
+              </h4>
+              {resultados[categoriaName].map((resultado) => (
+                <div
+                  key={resultado.preguntaId}
+                  className="mt-4 bg-gray-700 bg-opacity-80 p-3 rounded-lg shadow-sm"
+                >
+                  <p className="text-gray-300">
+                    <strong>Pregunta:</strong> {resultado.contenido}
+                  </p>
+                  <p className="text-gray-300">
+                    <strong>Respuesta:</strong> {resultado.respuesta}
+                  </p>
+                  <p className="text-gray-300">
+                    <strong>Total Riesgo:</strong> {resultado.totalRiesgo}
+                  </p>
+                  <p className="text-gray-300">
+                    <strong>Nivel de Riesgo:</strong>{" "}
+                    <span
+                      className={`
+                  ${resultado.nivelRiesgo === "Bajo" ? "text-green-500" : ""}
+                  ${resultado.nivelRiesgo === "Medio" ? "text-orange-500" : ""}
+                  ${resultado.nivelRiesgo === "Alto" ? "text-red-800" : ""}
+                  ${resultado.nivelRiesgo === "Muy Alto" ? "text-red-600" : ""}
+                  `}
+                    >
+                      {resultado.nivelRiesgo}
+                    </span>
+                  </p>
+                </div>
+              ))}
             </div>
           ))}
         </div>
@@ -185,7 +265,7 @@ const EncuestaRiesgo = () => {
             onClick={handleGoHome}
             className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-md focus:outline-none"
           >
-            Ir al inicio
+            Ir al Inicio
           </button>
         )}
       </div>
@@ -194,3 +274,4 @@ const EncuestaRiesgo = () => {
 };
 
 export default EncuestaRiesgo;
+
