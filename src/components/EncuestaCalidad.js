@@ -9,16 +9,14 @@ const EncuestaCalidad = () => {
   const [respuestas, setRespuestas] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [encuestaId, setEncuestaId] = useState(null); // Para almacenar el ID de la encuesta
-  const [isFormValid, setIsFormValid] = useState(false); // Para controlar si el formulario está listo para enviar
-  const [popupVisible, setPopupVisible] = useState(false); // Para controlar la visibilidad del popup
-  const [countdown, setCountdown] = useState(3); // Tiempo para la cuenta regresiva
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [resultados, setResultados] = useState(null); // Para almacenar los resultados
   const navigate = useNavigate();
 
   useEffect(() => {
     const software = JSON.parse(localStorage.getItem("software"));
     if (!software || !software.id) {
-      // Si no hay software o no tiene ID válido, redirige al usuario a /home
       navigate("/home");
       return;
     }
@@ -56,7 +54,6 @@ const EncuestaCalidad = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCuestionario(response.data);
-      // Inicializar respuestas vacías para cada pregunta
       const initialResponses = {};
       response.data.categorias.forEach((categoria) =>
         categoria.preguntas.forEach((pregunta) => {
@@ -81,8 +78,9 @@ const EncuestaCalidad = () => {
   };
 
   const validateForm = (responses) => {
-    // Verifica si todas las preguntas tienen una respuesta
-    const allAnswered = Object.values(responses).every((valor) => valor !== null);
+    const allAnswered = Object.values(responses).every(
+      (valor) => valor !== null
+    );
     setIsFormValid(allAnswered);
   };
 
@@ -92,7 +90,6 @@ const EncuestaCalidad = () => {
     const usuarioId = JSON.parse(localStorage.getItem("user")).id;
 
     try {
-      // Primero, crear la encuesta
       const encuestaResponse = await axios.post(
         "http://localhost:5000/api/v1/encuestas/",
         {
@@ -103,11 +100,8 @@ const EncuestaCalidad = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Obtener el ID de la encuesta
       const encuestaId = encuestaResponse.data.encuestaId;
-      setEncuestaId(encuestaId);
 
-      // Luego, enviar las respuestas
       const respuestasData = Object.keys(respuestas).map((preguntaId) => ({
         preguntaId,
         valor: respuestas[preguntaId],
@@ -122,27 +116,23 @@ const EncuestaCalidad = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Mostrar el popup de éxito y la cuenta regresiva
-      setPopupVisible(true);
-      setCountdown(3);
+      const resultadosResponse = await axios.get(
+        `http://localhost:5000/api/v1/encuestas/${encuestaId}/resultados`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      // Limpiar el campo software en el localStorage
-      localStorage.removeItem("software");
-
-      // Iniciar la cuenta regresiva
-      const countdownInterval = setInterval(() => {
-        setCountdown((prevCountdown) => {
-          if (prevCountdown === 1) {
-            clearInterval(countdownInterval);
-            navigate("/home"); // Redirigir al menú principal
-          }
-          return prevCountdown - 1;
-        });
-      }, 1000);
+      setResultados(resultadosResponse.data);
+      setIsSubmitted(true);
     } catch (error) {
       console.error("Error al enviar la encuesta:", error);
       alert("Hubo un problema al enviar la encuesta.");
     }
+  };
+
+  const handleGoToHome = () => {
+    localStorage.removeItem("software");
+    localStorage.removeItem("encuestaId");
+    navigate("/home");
   };
 
   const cleanCategoryName = (nombre) => {
@@ -160,111 +150,178 @@ const EncuestaCalidad = () => {
 
   return (
     <div className="p-6 bg-gray-900 bg-opacity-75 rounded-lg shadow-lg max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-gray-100">
-        Seleccionar Modelo de Calidad
-      </h2>
-
-      {/* Menú desplegable */}
-      <div className="mb-6">
-        <label htmlFor="modelo-calidad" className="block text-gray-300 mb-2">
-          Modelo de Calidad:
-        </label>
-        <select
-          id="modelo-calidad"
-          value={selectedModelo}
-          onChange={handleSelectChange}
-          className="w-full p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded shadow focus:outline-none focus:ring focus:ring-blue-600"
-        >
-          <option value="" disabled>
-            Seleccione un modelo...
-          </option>
-          {modelos.map((modelo) => (
-            <option key={modelo.id} value={modelo.id}>
-              {modelo.nombre}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Mostrar preguntas */}
-      {loading && <p className="text-gray-400">Cargando cuestionario...</p>}
-      {cuestionario && (
-        <div className="mt-6">
-          <h3 className="text-xl font-semibold text-gray-100">
-            Cuestionario: {cuestionario.nombre}
-          </h3>
-          {cuestionario.categorias.map((categoria) => (
-            <div
-              key={categoria.id}
-              className="mt-4 bg-gray-800 bg-opacity-90 p-4 rounded-lg shadow-lg"
+      {!isSubmitted ? (
+        <>
+          <h2 className="text-2xl font-bold mb-4 text-gray-100">
+            Seleccionar Modelo de Calidad
+          </h2>
+          <div className="mb-6">
+            <label
+              htmlFor="modelo-calidad"
+              className="block text-gray-300 mb-2"
             >
-              <h4 className="text-lg font-bold text-gray-200">
-                {cleanCategoryName(categoria.nombre)}
-              </h4>
-              <div className="mt-4 space-y-4">
-                {categoria.preguntas.map((pregunta) => (
-                  <div
-                    key={pregunta.id}
-                    className="flex flex-col bg-gray-700 bg-opacity-80 p-3 rounded-lg shadow-sm"
-                  >
-                    <label
-                      htmlFor={`pregunta-${pregunta.id}`}
-                      className="text-gray-300 mb-2"
-                    >
-                      {pregunta.contenido}
-                    </label>
-                    <div className="flex justify-between space-x-3">
-                      {[1, 2, 3, 4, 5].map((val) => (
-                        <div key={val} className="flex items-center">
-                          <input
-                            type="radio"
-                            id={`pregunta-${pregunta.id}-value-${val}`}
-                            name={`pregunta-${pregunta.id}`}
-                            value={val}
-                            checked={respuestas[pregunta.id] === val}
-                            onChange={() => handleInputChange(pregunta.id, val)}
-                            className="mr-2 transform scale-150 text-blue-500"
-                          />
-                          <label
-                            htmlFor={`pregunta-${pregunta.id}-value-${val}`}
-                            className="text-gray-300"
-                          >
-                            {val}
-                          </label>
+              Modelo de Calidad:
+            </label>
+            <select
+              id="modelo-calidad"
+              value={selectedModelo}
+              onChange={handleSelectChange}
+              className="w-full p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded shadow focus:outline-none focus:ring focus:ring-blue-600"
+            >
+              <option value="" disabled>
+                Seleccione un modelo...
+              </option>
+              {modelos.map((modelo) => (
+                <option key={modelo.id} value={modelo.id}>
+                  {modelo.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          {loading && <p className="text-gray-400">Cargando cuestionario...</p>}
+          {cuestionario && (
+            <div className="mt-6">
+              <h3 className="text-xl font-semibold text-gray-100">
+                Cuestionario: {cuestionario.nombre}
+              </h3>
+              {cuestionario.categorias.map((categoria) => (
+                <div
+                  key={categoria.id}
+                  className="mt-4 bg-gray-800 bg-opacity-90 p-4 rounded-lg shadow-lg"
+                >
+                  <h4 className="text-lg font-bold text-gray-200">
+                    {cleanCategoryName(categoria.nombre)}
+                  </h4>
+                  <div className="mt-4 space-y-4">
+                    {categoria.preguntas.map((pregunta) => (
+                      <div
+                        key={pregunta.id}
+                        className="flex flex-col bg-gray-700 bg-opacity-80 p-3 rounded-lg shadow-sm"
+                      >
+                        <label
+                          htmlFor={`pregunta-${pregunta.id}`}
+                          className="text-gray-300 mb-2"
+                        >
+                          {pregunta.contenido}
+                        </label>
+                        <div className="flex justify-between space-x-3">
+                          {[1, 2, 3, 4, 5].map((val) => (
+                            <div key={val} className="flex items-center">
+                              <input
+                                type="radio"
+                                id={`pregunta-${pregunta.id}-value-${val}`}
+                                name={`pregunta-${pregunta.id}`}
+                                value={val}
+                                checked={respuestas[pregunta.id] === val}
+                                onChange={() =>
+                                  handleInputChange(pregunta.id, val)
+                                }
+                                className="mr-2 transform scale-150 text-blue-500"
+                              />
+                              <label
+                                htmlFor={`pregunta-${pregunta.id}-value-${val}`}
+                                className="text-gray-300"
+                              >
+                                {val}
+                              </label>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={handleSubmit}
+              disabled={!isFormValid}
+              className={`${
+                isFormValid
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-600 cursor-not-allowed"
+              } text-white py-2 px-6 rounded-md focus:outline-none`}
+            >
+              Enviar Encuesta
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <h2 className="text-2xl font-bold mb-4 text-gray-100">
+            Resultados de la Encuesta
+          </h2>
+          <div className="space-y-6">
+  {/* Mostrar datos globales fuera de las categorías */}
+  <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
+  <h3 className="text-xl text-gray-200 font-semibold mb-4">Resultados Globales</h3>
+  <div className="space-y-2">
+    <p className="text-gray-300">
+      <strong>Ponderado Global:</strong> {resultados.ponderadoGlobal} %</p>
+    
+    {/* Asignar clase condicional al nivel global */}
+    <p className={`text-lg font-semibold ${
+      resultados.nivelGlobal === 'Excelente' ? 'text-green-500' :
+      resultados.nivelGlobal === 'Muy Bueno' ? 'text-green-300' :
+      resultados.nivelGlobal === 'Bueno' ? 'text-blue-500' :
+      resultados.nivelGlobal === 'Insuficiente' ? 'text-orange-500' :
+      resultados.nivelGlobal === 'Deficiente' ? 'text-red-500' :
+      'text-gray-300'
+    }`}>
+      <strong>Nivel de Calidad:</strong> {resultados.nivelGlobal}
+      </p>
+  </div>
+</div>
+
+  {/* Se agrega margen en la parte superior de las categorías para separarlas */}
+  <div className="space-y-6 mt-6"> {/* Aquí está el margen superior */}
+    {/* Renderizar categorías */}
+    {Object.entries(resultados.categorias).map(([categoria, data]) => (
+      <div
+        key={categoria}
+        className="bg-gray-800 p-4 rounded-lg shadow-lg"
+      >
+        <h3 className="text-xl text-gray-200 font-semibold mb-4">
+          {cleanCategoryName(categoria)} {/* Limpiar el nombre de la categoría */}
+        </h3>
+        <div className="space-y-3">
+          {data.preguntas.map((pregunta) => (
+            <div
+              key={pregunta.preguntaId}
+              className="p-3 bg-gray-700 rounded-lg shadow"
+            >
+              <p className="text-gray-300">{pregunta.contenido}</p>
+              <p className="text-gray-400">
+                Valor: <span className="font-semibold">{pregunta.valor}</span>
+              </p>
             </div>
           ))}
         </div>
-      )}
 
-      {/* Botón de enviar */}
-      <div className="mt-8 flex justify-center">
-        <button
-          onClick={handleSubmit}
-          disabled={!isFormValid}
-          className={`${
-            isFormValid
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-gray-600 cursor-not-allowed"
-          } text-white py-2 px-6 rounded-md focus:outline-none`}
-        >
-          Enviar Encuesta
-        </button>
-      </div>
-
-      {/* Popup de éxito */}
-      {popupVisible && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
-          <div className="bg-green-600 text-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">¡Encuesta creada con éxito!</h2>
-            <p className="text-lg">Serás redirigido al menú principal en {countdown} segundos...</p>
-          </div>
+        {/* Datos de la categoría */}
+        <div className="mt-4 p-3 bg-gray-900 rounded-lg">
+          <p className="text-gray-300">Puntos Máximos: {data.maximoPuntos}</p>
+          <p className="text-gray-300">Puntaje: {data.valor}</p>
+          <p className="text-gray-300">Nivel de Calidad de Parámetro: {data.promedioCategoria} %</p>
+          <p className="text-gray-300">Nivel de Calidad Ponderado: {data.ponderado} %</p>
+          
         </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={handleGoToHome}
+              className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-md focus:outline-none"
+            >
+              Regresar al inicio
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
