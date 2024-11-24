@@ -21,7 +21,6 @@ const HomeLayout = ({ userRole }) => (
         <Route path="/" element={<Home userRole={userRole} />} />
         <Route path="/quality-evaluation" element={<EncuestaCalidad />} /> {/* Ruta para EncuestaCalidad */}
         <Route path="/risk-evaluation" element={<EncuestaRiesgo />} /> {/* Ruta riesgo */}   
-        <Route path="/results-history" element={<div>Historial de Resultados</div>} />
         <Route path="/manage-company" element={<ManageCompany />} />
         <Route path="/manage-users" element={<ManageUsers />} />
         <Route path="/manage-software" element={<ManageSoftware />} /> {/* Nueva ruta para gestionar software */}
