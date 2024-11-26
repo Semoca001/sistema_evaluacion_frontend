@@ -5,6 +5,7 @@ const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [newUser, setNewUser] = useState({ nombre: '', correo: '', contrasena: '', empresa_id: null });
+  const [error, setError] = useState("");  // Para mostrar mensajes de error
 
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user'));
@@ -26,6 +27,22 @@ const ManageUsers = () => {
   }, [user.empresa_id]);
 
   const handleCreateUser = async () => {
+    // Validación de los campos
+    if (newUser.nombre.length > 50) {
+      setError("El nombre no puede exceder los 50 caracteres.");
+      return;
+    }
+    if (newUser.correo.length > 100) {
+      setError("El correo no puede exceder los 100 caracteres.");
+      return;
+    }
+    if (newUser.contrasena.length < 10 || newUser.contrasena.length > 20) {
+      setError("La contraseña debe tener entre 10 y 20 caracteres.");
+      return;
+    }
+
+    setError("");  // Limpiar el error si todo está bien
+
     try {
       const response = await axios.post('http://localhost:5000/api/v1/users/add-user', { ...newUser, empresa_id: user.empresa_id }, axiosConfig);
       setUsers((prev) => [...prev, response.data]);
@@ -56,6 +73,8 @@ const ManageUsers = () => {
 
   const filteredUsers = users.filter((user) => user.rol_id !== 1);
 
+  const isFormValid = newUser.nombre && newUser.correo && newUser.contrasena && !error; // Validación del formulario
+
   return (
     <div className="flex h-screen">
       <div className="flex-1 flex justify-center items-center">
@@ -72,6 +91,7 @@ const ManageUsers = () => {
                 value={newUser.nombre}
                 onChange={(e) => setNewUser({ ...newUser, nombre: e.target.value })}
                 className="bg-gray-700 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                maxLength={50}  // Limitar a 50 caracteres
               />
               <input
                 type="email"
@@ -79,6 +99,7 @@ const ManageUsers = () => {
                 value={newUser.correo}
                 onChange={(e) => setNewUser({ ...newUser, correo: e.target.value })}
                 className="bg-gray-700 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                maxLength={100}  // Limitar a 100 caracteres
               />
               <input
                 type="password"
@@ -86,11 +107,16 @@ const ManageUsers = () => {
                 value={newUser.contrasena}
                 onChange={(e) => setNewUser({ ...newUser, contrasena: e.target.value })}
                 className="bg-gray-700 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                minLength={10}  // Mínimo 10 caracteres
+                maxLength={20}  // Máximo 20 caracteres
               />
             </div>
+            {error && <p className="text-red-500 mt-2">{error}</p>} {/* Mostrar mensaje de error */}
+
             <button
               onClick={handleCreateUser}
-              className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-semibold"
+              className={`mt-4 px-6 py-2 ${isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-500 cursor-not-allowed'} rounded-md text-white font-semibold`}
+              disabled={!isFormValid}  // Deshabilitar si el formulario no es válido
             >
               Create
             </button>
@@ -115,6 +141,7 @@ const ManageUsers = () => {
                       value={editingUser.nombre}
                       onChange={(e) => setEditingUser({ ...editingUser, nombre: e.target.value })}
                       className="bg-gray-700 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                      maxLength={50}  // Limitar a 50 caracteres
                     />
                   ) : (
                     user.nombre
@@ -127,6 +154,7 @@ const ManageUsers = () => {
                       value={editingUser.correo}
                       onChange={(e) => setEditingUser({ ...editingUser, correo: e.target.value })}
                       className="bg-gray-700 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                      maxLength={100}  // Limitar a 100 caracteres
                     />
                   ) : (
                     user.correo

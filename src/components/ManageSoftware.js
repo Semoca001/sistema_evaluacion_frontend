@@ -97,6 +97,8 @@ const ManageSoftware = () => {
     setEditingSoftware(null);
   };
 
+  const isCreateButtonDisabled = !newSoftwareName || newSoftwareName.length > 50;  // Deshabilitar si el nombre está vacío o excede 50 caracteres
+
   return (
     <div className="flex h-screen">
       <div className="flex-1 flex justify-center items-center">
@@ -113,11 +115,17 @@ const ManageSoftware = () => {
                 value={newSoftwareName}
                 onChange={(e) => setNewSoftwareName(e.target.value)}
                 className="bg-gray-700 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                maxLength={50}  // Limitar a 50 caracteres
               />
             </div>
+            {/* Notificación si el nombre excede los 50 caracteres */}
+            {newSoftwareName.length > 50 && (
+              <p className="text-red-500 mt-2">El nombre no puede exceder los 50 caracteres.</p>
+            )}
             <button
               onClick={handleCreateSoftware}
-              className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-semibold"
+              className={`mt-4 px-6 py-2 ${isCreateButtonDisabled ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} rounded-md text-white font-semibold`}
+              disabled={isCreateButtonDisabled}  // Deshabilitar si el nombre está vacío o excede los 50 caracteres
             >
               Crear
             </button>
@@ -140,6 +148,7 @@ const ManageSoftware = () => {
                       value={editingSoftware.nombre}
                       onChange={(e) => setEditingSoftware({ ...editingSoftware, nombre: e.target.value })}
                       className="bg-gray-700 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                      maxLength={50}  // Limitar a 50 caracteres
                     />
                   ) : (
                     software.nombre
