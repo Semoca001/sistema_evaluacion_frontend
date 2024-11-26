@@ -99,57 +99,70 @@ const ManageCompany = () => {
     }
   };
 
+  // Función para manejar el cambio en el campo de nombre de la empresa
+  const handleNameChange = (e) => {
+    const newName = e.target.value;
+    if (newName.length <= 50) {
+      setCompanyName(newName);
+    }
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen">
-    <div className="bg-gray-700 bg-opacity-70 p-6 rounded-lg shadow-lg w-full max-w-md">
-      <h1 className="text-2xl font-bold mb-4 text-center text-white">Gestión de Empresa</h1>
-  
-      {!companyId ? (
-        // Formulario para crear empresa
-        <>
-          <div className="mb-4">
-            <label className="block mb-2 text-white">Nombre de la empresa:</label>
-            <input
-              type="text"
-              className="border border-gray-300 p-2 w-full text-black rounded"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={handleCreateCompany}
-            className="bg-blue-500 text-white px-4 py-2 rounded w-full"
-          >
-            Crear Empresa
-          </button>
-        </>
-      ) : (
-        // Opciones de editar
-        <>
-          <div className="mb-4">
-            <label className="block mb-2 text-white">Nombre de la empresa:</label>
-            <input
-              type="text"
-              className="border border-gray-300 p-2 w-full text-black rounded"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-            />
-          </div>
-          <div className="space-x-4">
+      <div className="bg-gray-700 bg-opacity-70 p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-4 text-center text-white">Gestión de Empresa</h1>
+
+        {!companyId ? (
+          // Formulario para crear empresa
+          <>
+            <div className="mb-4">
+              <label className="block mb-2 text-white">Nombre de la empresa:</label>
+              <input
+                type="text"
+                className="border border-gray-300 p-2 w-full text-black rounded"
+                value={companyName}
+                onChange={handleNameChange} // Llamada a la nueva función
+              />
+              {companyName.length === 50 && (
+                <p className="text-red-500 text-sm mt-1">El nombre no puede exceder los 50 caracteres.</p>
+              )}
+            </div>
             <button
-              onClick={handleUpdateCompany}
-              className="bg-yellow-500 text-white px-4 py-2 rounded w-full"
+              onClick={handleCreateCompany}
+              className="bg-blue-500 text-white px-4 py-2 rounded w-full"
             >
-              Actualizar Empresa
+              Crear Empresa
             </button>
-          </div>
-        </>
-      )}
-  
-      {message && <p className="mt-4 text-green-500 text-center">{message}</p>}
+          </>
+        ) : (
+          // Opciones de editar
+          <>
+            <div className="mb-4">
+              <label className="block mb-2 text-white">Nombre de la empresa:</label>
+              <input
+                type="text"
+                className="border border-gray-300 p-2 w-full text-black rounded"
+                value={companyName}
+                onChange={handleNameChange} // Llamada a la nueva función
+              />
+              {companyName.length === 50 && (
+                <p className="text-red-500 text-sm mt-1">El nombre no puede exceder los 50 caracteres.</p>
+              )}
+            </div>
+            <div className="space-x-4">
+              <button
+                onClick={handleUpdateCompany}
+                className="bg-yellow-500 text-white px-4 py-2 rounded w-full"
+              >
+                Actualizar Empresa
+              </button>
+            </div>
+          </>
+        )}
+
+        {message && <p className="mt-4 text-green-500 text-center">{message}</p>}
+      </div>
     </div>
-  </div>
-  
   );
 };
 
