@@ -79,6 +79,12 @@ const Sidebar = () => {
         <nav className="flex flex-col space-y-4">
           <h2 className="text-lg font-semibold text-gray-300">Menú Principal</h2>
           <Link
+            to="/home/historial-resultados"
+            className="py-2 px-4 rounded bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-md bg-opacity-80"
+          >
+            Historial de Resultados
+          </Link>
+          <Link
             to="/home/manage-software"
             className="py-2 px-4 rounded bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-md bg-opacity-80"
           >
