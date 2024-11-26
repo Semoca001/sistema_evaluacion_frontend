@@ -32,7 +32,8 @@ const HistorialResultados = () => {
       })
       .catch(error => {
         console.error("Error al cargar las encuestas", error);
-      });
+      }); 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endpoint, token]);
 
   const handleViewResults = (encuestaId, tipoEncuestaId) => {
