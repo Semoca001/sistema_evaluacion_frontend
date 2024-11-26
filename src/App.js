@@ -9,9 +9,12 @@ import ManageUsers from "./components/ManageUsers";
 import ManageSoftware from "./components/ManageSoftware";
 import EncuestaCalidad from "./components/EncuestaCalidad";
 import EncuestaRiesgo from "./components/EncuestaRiesgo";
+import HistorialResultados from "./components/HistorialResultados";
+import VerResultadoCalidad from "./components/VerResultadoCalidad";
+import VerResultadoRiesgo from "./components/VerResultadoRiesgo";
 
 const ROLE_ROUTES = {
-  1: ["/home", "/home/manage-company", "/home/manage-users", "/home/manage-software"],
+  1: ["/home", "/home/manage-company", "/home/manage-users", "/home/manage-software", "/home/historial-resultados", "/home/view-results-quality"],
   2: ["/home", "/home/manage-software"],
   3: ["/home", "/home/manage-software"]
 };
@@ -70,6 +73,9 @@ const HomeLayout = () => {
           } />
           <Route path="/quality-evaluation" element={<EncuestaCalidad />} />
           <Route path="/risk-evaluation" element={<EncuestaRiesgo />} />
+          <Route path="/historial-resultados" element={<HistorialResultados />} />
+          <Route path="/view-results-quality" element={<VerResultadoCalidad />} />
+          <Route path="/view-results-risk" element={<VerResultadoRiesgo />} />
         </Routes>
       </div>
     </div>
